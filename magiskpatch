@@ -1,0 +1,100 @@
+#!/bin/bash
+
+# This will patch magisk into an emulator ramisk
+
+# expects /opt/magisk/bin to have magiskinit/magiskboot/magisk64.xz/magisk32.xz
+
+RAMDISK="${1}"
+
+if [ -z "$RAMDISK" ];then
+  >&2 echo "Usage: ${0} <RAMDISK>"
+  exit 1
+fi
+
+RAMDISK=$(realpath "${RAMDISK}")
+WORKDIR=$(mktemp -d)
+
+# no matter how this script exits, clean up temp-dir
+cleanup () {
+  rm -rf "${WORKDIR}"
+}
+trap cleanup EXIT
+
+# extract multipart cpio file to a directory
+multipart_cpio_extract () {
+  FILEIN="${1}"
+  DIROUT="${2}"
+  COUNT=$(strings -t d "${FILEIN}" | grep 'TRAILER!!!' | wc -l)
+  TMPFILE=$(mktemp)
+  if [ $COUNT -gt 1 ]; then
+    mkdir -p "${DIROUT}"
+    LAST_INDEX=0
+    IBS=1
+    OBS=4096
+    RAMDISKS=$(strings -t d "${FILEIN}" | grep 'TRAILER!!!')
+    for OFFSET in $RAMDISKS; do
+      # calculate offset to next archive
+      if [[ $OFFSET == *"TRAILER"* ]]; then
+        # find position of end of TRAILER!!! string in image
+        LEN=${#OFFSET}
+        START=$((LAST_INDEX+LEN))
+
+        # find first occurance of string in image, that will be start of cpio archive
+        dd if="${FILEIN}" skip=$START count=$OBS ibs=$IBS obs=$OBS of="${TMPFILE}" 2> /dev/null
+        HEAD=($(strings -t d "${TMPFILE}" | head -1))
+        LAST_INDEX=$((START+$((HEAD[0]))))
+        continue
+      fi
+      BLOCKS=$(((OFFSET+128)/IBS))
+      dd if="${FILEIN}" skip=$LAST_INDEX count=$BLOCKS ibs=$IBS obs=$OBS of="${TMPFILE}" 2> /dev/null
+      cd "${DIROUT}"
+      cat "${TMPFILE}" | cpio -i
+      cd - > /dev/null
+      LAST_INDEX=$OFFSET
+    done
+  fi
+  rm -f "${TMPFILE}"
+}
+
+# create a cpio file from a directory
+create_cpio () {
+  DIRIN="${1}"
+  FILEOUT="${2}"
+  cd "${DIRIN}"
+  find . | cpio -H newc -o > "${FILEOUT}"
+  cd -
+}
+
+echo "Patching ${RAMDISK}"
+R=$(basename "$RAMDISK")
+cp "${RAMDISK}" "${WORKDIR}/${R}.gz"
+cd "${WORKDIR}"
+gunzip "${R}.gz"
+multipart_cpio_extract "${R}" ramdisk
+tree "${WORKDIR}/ramdisk"
+create_cpio ramdisk "${WORKDIR}/${R}.cpio"
+
+# settings used for magiskboot patch
+export KEEPVERITY=false
+export KEEPFORCEENCRYPT=true
+export RECOVERYMODE=false
+
+echo "KEEPVERITY=$KEEPVERITY" > config
+echo "KEEPFORCEENCRYPT=$KEEPFORCEENCRYPT" >> config
+echo "RECOVERYMODE=$RECOVERYMODE" >> config
+
+magiskboot cpio "${WORKDIR}/${R}.cpio" \
+"mkdir 0750 overlay.d" \
+"mkdir 0750 overlay.d/sbin" \
+"add 0644 overlay.d/sbin/magisk64.xz /opt/magisk/bin/magisk64.xz" \
+"add 0644 overlay.d/sbin/magisk32.xz /opt/magisk/bin/magisk32.xz" \
+"patch" \
+"backup ramdisk.cpio.orig" \
+"mkdir 000 .backup" \
+"add 000 .backup/.magisk config" \
+"mv init .backup/init" \
+"add 0750 init /opt/magisk/bin/magiskinit"
+
+magiskboot repack "${WORKDIR}/${R}.cpio"
+magiskboot compress=gzip "${WORKDIR}/${R}.cpio" "${RAMDISK}"
+
