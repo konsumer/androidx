@@ -43,18 +43,22 @@ docker run --rm -it \
     konsumer/androidx
 ```
 
+### env-vars
+
+There are a few variables you can use to modify what emulator you want to use. These are the defaults:
+
+```
+ANDROID_API="30"
+ANDROID_TAG="google_apis_playstore"
+```
+
 
 ### dev notes
 
 This is how to publish:
 
 ```
-docker build --no-cache .
-
-# 0c7d8d985c67 is outputted image, from above
-docker tag 0c7d8d985c67 konsumer/androidx:latest
-docker tag 0c7d8d985c67 konsumer/androidx:playstore-30
+docker build --tag konsumer/androidx:latest .
 
 docker push konsumer/androidx:latest
-docker push konsumer/androidx:playstore-30
 ```

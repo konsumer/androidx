@@ -1,6 +1,2 @@
 .DS_Store
-*.img
-*.cpio
-.history
-*.zip
-*.apk
+emulator/

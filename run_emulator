@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash
 
 # this is an entrypoint for emulator, that will check for files and download stuff, if needed.
 
@@ -6,10 +6,12 @@
 ARCH=$(uname -m)
 
 if [ ! -d "/opt/android/system-images/android-${ANDROID_API}/${ANDROID_TAG}" ];then
-  sdkmanager "system-images;android-${ANDROID_API};${ANDROID_TAG};x86_64" "platforms;android-${ANDROID_API}"
+  sdkmanager "system-images;android-${ANDROID_API};${ANDROID_TAG};${ARCH}" "platforms;android-${ANDROID_API}"
   magiskpatch ${ANDROID_SDK_ROOT}/system-images/android-${ANDROID_API}/${ANDROID_TAG}/${ARCH}/ramdisk.img
 fi
 
 if [ ! -d "${HOME}/.android/avd/default.avd" ];then
-  echo no | avdmanager create avd --force --name "default" --abi ${ANDROID_TAG}/${ARCH} --package "system-images;android-${ANDROID_API};${ANDROID_TAG};x86_64"
+  echo no | avdmanager create avd --force --name "default" --abi ${ANDROID_TAG}/${ARCH} --package "system-images;android-${ANDROID_API};${ANDROID_TAG};${ARCH}"
 fi
+
+emulator @default $*
