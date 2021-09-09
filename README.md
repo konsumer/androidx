@@ -22,3 +22,18 @@ docker ps
 
 docker exec -it ID_FROM_ABOVE adb shell
 ```
+
+### dev notes
+
+This is how to publish:
+
+```
+docker build .
+
+# a15fd838b155 is outputted image, from above
+docker tag a15fd838b155 konsumer/androidx:latest
+docker tag a15fd838b155 konsumer/androidx:playstore-30
+
+docker publish konsumer/androidx:latest
+docker publish konsumer/androidx:playstore-30
+```
