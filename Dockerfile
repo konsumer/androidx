@@ -9,7 +9,6 @@ ARG ANDROID_TAG="google_apis_playstore"
 
 ENV ANDROID_SDK_HOME=/opt/android
 ENV ANDROID_SDK_ROOT=/opt/android
-ENV ANDROID_AVD_HOME=/opt/android/.android
 ENV PATH=${PATH}:${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin:${ANDROID_SDK_ROOT}/platform-tools/:${ANDROID_SDK_ROOT}/emulator:/opt/magisk/bin
 
 # download SDK and magisk binaries from upstream
@@ -41,7 +40,7 @@ RUN cd /tmp && unzip /opt/magisk/magisk.apk > /dev/null && \
 RUN magiskpatch ${ANDROID_SDK_HOME}/system-images/android-${ANDROID_API}/${ANDROID_TAG}/x86_64/ramdisk.img
 
 # cleanup
-RUN rm -rf /tmp/* /var/lib/apt/lists/* "${ANDROID_AVD_HOME}/default/*.lock"
+RUN rm -rf /tmp/* /var/lib/apt/lists/*
 
 FROM avd-base as emulator
 
