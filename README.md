@@ -4,7 +4,7 @@ Easy graphical Android emulaton in docker, if you are using X on the host (requi
 
 ## usage
 
-You can run a graphical API-30 playstore emulator with this:
+You can run a graphical rooted API-30 playstore emulator with this:
 
 ```
 docker run --rm -it \
@@ -25,12 +25,12 @@ docker exec -it ID_FROM_ABOVE adb shell
 
 ### volumes
 
-There are 2 volumes you can use for persistance of your emulator (and faster boot):
+There are 2 volumes you can use for persistence of your emulator (and faster boot):
 
 - `/opt/android/system-images` - this is where the huge system-images are located
 - `/root/.android` - this ios where the emulator settings are located, and they are also pretty big
 
-So, to put all together with persistance:
+So, to put all together with persistence:
 
 ```
 docker run --rm -it \
