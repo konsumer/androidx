@@ -19,7 +19,6 @@ after that, if you want to connect via adb:
 
 ```
 docker ps
-
 docker exec -it ID_FROM_ABOVE adb shell
 ```
 
