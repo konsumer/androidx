@@ -38,8 +38,8 @@ docker run --rm -it \
     -e "DISPLAY=${DISPLAY:-:0.0}" \
     -v ${XAUTHORITY}:/root/.Xauthority \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
-    -v emulator/system-images:/opt/android/system-images \
-    -v emulator/settings:/root/.android \
+    -v ${PWD}/emulator/system-images:/opt/android/system-images \
+    -v ${PWD}/emulator/settings:/root/.android \
     konsumer/androidx
 ```
 
