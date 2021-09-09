@@ -8,8 +8,8 @@ You can run a graphical API-30 playstore emulator with this:
 
 ```
 docker run --rm -it \
-    -e "DISPLAY=${DISPLAY:-:0.0}" \
     --device /dev/kvm \
+    -e "DISPLAY=${DISPLAY:-:0.0}" \
     -v ${XAUTHORITY}:/root/.Xauthority \
     -v /tmp/.X11-unix:/tmp/.X11-unix\
     konsumer/androidx 
