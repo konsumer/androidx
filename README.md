@@ -18,5 +18,7 @@ docker run --rm -it \
 after that, if you want to connect via adb:
 
 ```
-docker exec -it konsumer/androidx adb shell
+docker ps
+
+docker exec -it ID_FROM_ABOVE adb shell
 ```
