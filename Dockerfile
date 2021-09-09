@@ -1,11 +1,11 @@
-FROM openjdk:slim as avd-base
+FROM bitnami/minideb:latest as avd-base
 
 # These are used below to grab stuff
 # initial SDK tools version (can be updated later with sdkmanager)
 ARG SDK_VERSION="7583922"
 ARG MAGISK_VERSION="v23.0"
-ARG ANDROID_API="30"
-ARG ANDROID_TAG="google_apis_playstore"
+ENV ANDROID_API="30"
+ENV ANDROID_TAG="google_apis_playstore"
 
 ENV ANDROID_SDK_ROOT=/opt/android
 ENV PATH=${PATH}:${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin:${ANDROID_SDK_ROOT}/platform-tools/:${ANDROID_SDK_ROOT}/emulator:/opt/magisk/bin
@@ -15,15 +15,9 @@ ADD https://dl.google.com/android/repository/commandlinetools-linux-${SDK_VERSIO
 ADD https://github.com/topjohnwu/Magisk/releases/download/${MAGISK_VERSION}/Magisk-${MAGISK_VERSION}.apk /opt/magisk/magisk.apk
 
 # install system-deps
-RUN apt-get update && apt-get install -y tree binutils cpio unzip libxcb-xinerama0 libxi6 libxtst6 libpulse0 libglu1-mesa libnss3 libxcomposite1 libxcursor1 libasound2
-
+RUN install_packages default-jre squashfs-tools binutils cpio unzip libxcb-xinerama0 libxi6 libxtst6 libpulse0 libglu1-mesa libnss3 libxcomposite1 libxcursor1 libasound2
 RUN mkdir -p $ANDROID_SDK_ROOT/cmdline-tools && unzip /tmp/android-sdk.zip -d /tmp > /dev/null && mv /tmp/cmdline-tools $ANDROID_SDK_ROOT/cmdline-tools/latest
-RUN yes | sdkmanager --licenses > /dev/null && sdkmanager "system-images;android-${ANDROID_API};${ANDROID_TAG};x86_64" "platform-tools" "platforms;android-${ANDROID_API}"
-
-# setup emulator
-RUN echo no | avdmanager create avd --force --name "default" \
-  --abi ${ANDROID_TAG}/x86_64 \
-  --package "system-images;android-${ANDROID_API};${ANDROID_TAG};x86_64"
+RUN yes | sdkmanager --licenses > /dev/null && sdkmanager "emulator" "platform-tools"
 
 
 # setup magisk
@@ -35,14 +29,12 @@ RUN cd /tmp && unzip /opt/magisk/magisk.apk > /dev/null && \
   magiskboot compress=xz lib/x86/libmagisk64.so /opt/magisk/bin/magisk64.xz && \
   magiskboot compress=xz lib/x86/libmagisk32.so /opt/magisk/bin/magisk32.xz
 
-# patch ramdisk for root/magisk
-RUN magiskpatch ${ANDROID_SDK_ROOT}/system-images/android-${ANDROID_API}/${ANDROID_TAG}/x86_64/ramdisk.img
+# add emulator entry-point
+ADD run_emulator ${ANDROID_SDK_ROOT}/platform-tools/run_emulator
 
 # cleanup
-RUN rm -rf /tmp/* /var/lib/apt/lists/*
+RUN rm -rf /tmp/*
 
 FROM avd-base as emulator
-
 ENV QT_X11_NO_MITSHM=1
-
-CMD [ "emulator", "@default"]
+CMD run_emulator
