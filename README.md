@@ -58,6 +58,5 @@ This is how to publish:
 
 ```
 docker build --tag konsumer/androidx:latest .
-
 docker push konsumer/androidx:latest
 ```
