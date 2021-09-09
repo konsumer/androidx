@@ -7,7 +7,6 @@ ARG MAGISK_VERSION="v23.0"
 ARG ANDROID_API="30"
 ARG ANDROID_TAG="google_apis_playstore"
 
-ENV ANDROID_SDK_HOME=/opt/android
 ENV ANDROID_SDK_ROOT=/opt/android
 ENV PATH=${PATH}:${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin:${ANDROID_SDK_ROOT}/platform-tools/:${ANDROID_SDK_ROOT}/emulator:/opt/magisk/bin
 
@@ -37,7 +36,7 @@ RUN cd /tmp && unzip /opt/magisk/magisk.apk > /dev/null && \
   magiskboot compress=xz lib/x86/libmagisk32.so /opt/magisk/bin/magisk32.xz
 
 # patch ramdisk for root/magisk
-RUN magiskpatch ${ANDROID_SDK_HOME}/system-images/android-${ANDROID_API}/${ANDROID_TAG}/x86_64/ramdisk.img
+RUN magiskpatch ${ANDROID_SDK_ROOT}/system-images/android-${ANDROID_API}/${ANDROID_TAG}/x86_64/ramdisk.img
 
 # cleanup
 RUN rm -rf /tmp/* /var/lib/apt/lists/*

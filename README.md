@@ -11,7 +11,7 @@ docker run --rm -it \
     --device /dev/kvm \
     -e "DISPLAY=${DISPLAY:-:0.0}" \
     -v ${XAUTHORITY}:/root/.Xauthority \
-    -v /tmp/.X11-unix:/tmp/.X11-unix\
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
     konsumer/androidx 
 ```
 
@@ -28,12 +28,12 @@ docker exec -it ID_FROM_ABOVE adb shell
 This is how to publish:
 
 ```
-docker build .
+docker build --no-cache .
 
-# a15fd838b155 is outputted image, from above
-docker tag a15fd838b155 konsumer/androidx:latest
-docker tag a15fd838b155 konsumer/androidx:playstore-30
+# b3735ec62760 is outputted image, from above
+docker tag b3735ec62760 konsumer/androidx:latest
+docker tag b3735ec62760 konsumer/androidx:playstore-30
 
-docker publish konsumer/androidx:latest
-docker publish konsumer/androidx:playstore-30
+docker push konsumer/androidx:latest
+docker push konsumer/androidx:playstore-30
 ```
