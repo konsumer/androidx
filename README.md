@@ -1,6 +1,6 @@
 # androidx
 
-Easy graphical Android emulaton in docker, if you are using X on the host (requires linux.)
+Easy graphical Android emulaton in docker, if you are using X on the host.
 
 ## usage
 
